@@ -1,2 +1,0 @@
-# CS360-EcommerceWebsiteProject
- 
