@@ -25,3 +25,13 @@
 .dropdown:hover .dropdown-content {
     display: block;
 }
+
+#home-pics {
+    max-width: 200px;
+    height: 200px;
+}
+
+#shop-pics {
+    max-width: 200px;
+    height: 200px;
+}
