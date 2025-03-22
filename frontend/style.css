@@ -1,134 +1,27 @@
-/* Reset CSS */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Body and Page Styling */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    padding: 20px;
-    text-align: center;
-}
-
-/* Header Styling */
-header {
+/* Nav Bar */
+.nav-bar {
     background-color: #333;
-    color: white;
     padding: 10px;
-    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
 }
 
-header h1 {
-    font-size: 2rem;
-}
+    .nav-bar a {
+        color: white;
+        padding: 14px;
+        text-decoration: none;
+    }
 
-#cart-link {
-    color: white;
-    text-decoration: none;
-    margin-top: 10px;
+/* Dropdown */
+.dropdown {
+    position: relative;
     display: inline-block;
 }
 
-/* Product Grid */
-.products-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 40px;
+.dropdown-content {
+    display: none;
 }
 
-.product {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 20px;
-    text-align: center;
-    transition: transform 0.3s ease;
-}
-
-.product:hover {
-    transform: translateY(-5px);
-}
-
-.product img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 5px;
-}
-
-.product h3 {
-    font-size: 1.5rem;
-    margin-top: 15px;
-}
-
-.product p {
-    font-size: 1.2rem;
-    color: #333;
-}
-
-.product button {
-    background-color: #28a745;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.product button:hover {
-    background-color: #218838;
-}
-
-/* Cart Styling */
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #ddd;
-    margin: 10px;
-    padding: 10px;
-    background-color: white;
-    border-radius: 5px;
-}
-
-.cart-item img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 5px;
-}
-
-.cart-item h4 {
-    flex: 1;
-}
-
-.cart-item button {
-    background-color: red;
-    padding: 5px;
-    font-size: 0.9rem;
-}
-
-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-/* Checkout Button */
-.checkout-button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
-.checkout-button:hover {
-    background-color: #0056b3;
+.dropdown:hover .dropdown-content {
+    display: block;
 }
