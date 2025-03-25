@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <header>
+        <h1>Admin Panel</h1>
+    </header>
+
+    <section>
+        <div id="product-list"></div>
+        <button onclick="addProduct()">Add Product</button>
+    </section>
+
+    <script>
+        async function loadProducts() {
+            const response = await fetch('/products');
+            const products = await response.json();
+
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+
+            products.forEach(product => {
+                productList.innerHTML += `
+                    <div>
+                        <h3>${product.name}</h3>
+                        <p>$${product.price}</p>
+                        <button onclick="editProduct(${product.id})">Edit</button>
+                        <button onclick="deleteProduct(${product.id})">Delete</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function addProduct() {
+            const name = prompt("Enter product name:");
+            const price = prompt("Enter product price:");
+            const quantity = prompt("Enter product quantity:");
+            const image = prompt("Enter image URL:");
+            const description = prompt("Enter product description:");
+
+            await fetch('/admin/add-product', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price, quantity, image, description })
+            });
+            loadProducts();
+        }
+
+        async function deleteProduct(id) {
+            await fetch(`/admin/delete-product/${id}`, { method: 'DELETE' });
+            loadProducts();
+        }
+
+        async function editProduct(id) {
+            const name = prompt("Enter new name:");
+            const price = prompt("Enter new price:");
+            const quantity = prompt("Enter new quantity:");
+            const image = prompt("Enter new image URL:");
+            const description = prompt("Enter new description:");
+
+            await fetch(`/admin/edit-product/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price, quantity, image, description })
+            });
+            loadProducts();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>

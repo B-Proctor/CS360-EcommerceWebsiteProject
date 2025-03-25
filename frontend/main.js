@@ -50,17 +50,23 @@ async function checkLoginStatus() {
     const nav = document.getElementById('nav-bar');
 
     if (response.ok) {
+        const user = await response.json();
+
         nav.innerHTML = `
             <a href="/">Home</a>
             <a href="/shop">Shop</a>
             <a href="/cart">Cart</a>
             <div class="dropdown">
-                <a href="/profile">Profile ▼</a>
+                <a href="/profile">${user.firstName} ${user.lastName} ▼</a>
                 <div class="dropdown-content">
                     <a href="#" onclick="logout()">Logout</a>
                 </div>
             </div>
         `;
+
+        if (user.isAdmin) {
+            nav.innerHTML += `<a href="/admin">Admin Panel</a>`;
+        }
     } else {
         nav.innerHTML = `
             <a href="/">Home</a>
@@ -72,9 +78,56 @@ async function checkLoginStatus() {
     }
 }
 
+
+
 async function logout() {
-    await fetch('/logout', { credentials: 'include' });
-    window.location.href = '/';
+    const response = await fetch('/logout', {
+        method: 'POST',
+        credentials: 'include'
+    });
+
+    if (response.ok) {
+        window.location.href = '/';
+    } else {
+        const message = await response.text();
+        alert(`Logout failed: ${message}`);
+    }
 }
+
+async function addToCart(item) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const response = await fetch(`/products`);
+    const products = await response.json();
+    const product = products.find(p => p.id === item.id);
+
+    if (product) {
+        const existingItem = cart.find(i => i.id === item.id);
+
+        if (existingItem) {
+            if (existingItem.quantity < product.quantity) {
+                existingItem.quantity += 1;
+            } else {
+                alert(`Only ${product.quantity} in stock.`);
+                return;
+            }
+        } else {
+            if (item.quantity <= product.quantity) {
+                cart.push(item);
+            } else {
+                alert(`Only ${product.quantity} in stock.`);
+                return;
+            }
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+        console.log("Item added to cart:", cart);
+        loadCart();
+    } else {
+        alert('Product no longer available.');
+    }
+}
+
+
 
 document.addEventListener('DOMContentLoaded', checkLoginStatus);
