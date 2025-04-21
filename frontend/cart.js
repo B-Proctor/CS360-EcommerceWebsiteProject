@@ -92,6 +92,59 @@ async function checkout() {
         }
     }
 
+    // If all checks passed, show modal
+    const modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+    modal.show();
+}
+
+
+async function handleFakePayment(event) {
+    event.preventDefault();
+
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s+/g, '');
+    const cardName = document.getElementById('cardName').value.trim();
+    const expiry = document.getElementById('expiry').value.trim();
+    const cvv = document.getElementById('cvv').value.trim();
+
+    if (!luhnCheck(cardNumber)) {
+        alert('Invalid credit card number.');
+        return false;
+    }
+
+    if (!cardName || !expiry || !cvv) {
+        alert('Please fill in all fields.');
+        return false;
+    }
+
+    // Expiration format and range check
+    const [expMonth, expYear] = expiry.split('/');
+    if (!expMonth || !expYear || expMonth < 1 || expMonth > 12) {
+        alert('Invalid expiry date format. Use MM/YY.');
+        return false;
+    }
+
+    const now = new Date();
+    const currentYear = parseInt(now.getFullYear().toString().slice(-2)); // YY
+    const currentMonth = now.getMonth() + 1; // 0-indexed
+
+    const expMonthNum = parseInt(expMonth);
+    const expYearNum = parseInt(expYear);
+
+    if (isNaN(expMonthNum) || isNaN(expYearNum)) {
+        alert('Invalid expiry date.');
+        return false;
+    }
+
+    if (
+        expYearNum < currentYear ||
+        (expYearNum === currentYear && expMonthNum < currentMonth)
+    ) {
+        alert('Your card has expired.');
+        return false;
+    }
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
     const checkoutResponse = await fetch('/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,8 +156,38 @@ async function checkout() {
         localStorage.removeItem("cart");
         loadCart();
         loadProducts();
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
+        modal.hide();
     } else {
         alert('Checkout failed.');
     }
+
+    return true;
 }
 
+
+//Credit card number check I found online
+/*Numbers that work:
+* 4111 1111 1111 1111 Visa
+* 6011 1111 1111 1117 Discover
+* 5500 0000 0000 0004 Mastercard
+*/
+function luhnCheck(cardNum) {
+    let sum = 0;
+    let shouldDouble = false;
+
+    for (let i = cardNum.length - 1; i >= 0; i--) {
+        let digit = parseInt(cardNum[i]);
+
+        if (shouldDouble) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+
+        sum += digit;
+        shouldDouble = !shouldDouble;
+    }
+
+    return sum % 10 === 0;
+}
