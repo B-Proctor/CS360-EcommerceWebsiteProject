@@ -7,7 +7,12 @@ const db = mysql.createConnection({
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '',
     database: process.env.DB_NAME || 'user_system',
-    multipleStatements: true
+    port: process.env.DB_PORT || 3306,
+    multipleStatements: true,
+    ssl: process.env.DB_SSL === 'true' ? {
+        rejectUnauthorized: true
+        // You can add cert/key/ca options here if Aiven provides them
+    } : undefined
 });
 
 db.connect(err => {
@@ -15,7 +20,7 @@ db.connect(err => {
         console.error('Database connection failed:', err.stack);
         return;
     }
-    console.log('Connected to MySQL database.');
+    console.log('✅ Connected to MySQL database.');
 });
 
 module.exports = db;
