@@ -17,6 +17,7 @@
     "express": "^4.21.2",
     "express-session": "^1.18.1",
     "mysql": "^2.18.1",
+    "mysql2": "^3.14.0",
     "stack": "^0.1.0"
   }
 }
