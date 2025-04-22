@@ -37,7 +37,7 @@
                             <img src="${product.image}" class="card-img-top" alt="${product.name}">
                             <div class="card-body">
                                 <h5 class="card-title">${product.name}</h5>
-                                <p class="card-text">$${product.price.toFixed(2)}</p>
+                                <p class="card-text">$${Number(product.price).toFixed(2)}</p>
                                 <p class="card-text">In Stock: ${product.quantity}</p>
 
                                 <button class="btn btn-success" onclick="addToCart({
