@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'https://cs360-ecommercewebsiteproject.onrender.com/',
     credentials: true
 }));
 
@@ -89,5 +89,5 @@ app.use((err, req, res, next) => {
 
 const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on https://cs360-ecommercewebsiteproject.onrender.com/:${PORT}`);
 });
