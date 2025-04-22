@@ -3,7 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
 const db = require('./backend/dbConfig');
-const authRoutes = require('./authRoutes');
+const authRoutes = require('./backend/authRoutes');
 
 const app = express();
 
@@ -27,7 +27,7 @@ app.use(session({
     }
 }));
 
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, './frontend')));
 
 
 app.use(authRoutes);
@@ -36,27 +36,27 @@ app.use(authRoutes);
 
 // Home Page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.sendFile(path.join(__dirname, './frontend/index.html'));
 });
 
 // Login Page
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/login.html'));
+    res.sendFile(path.join(__dirname, './frontend/login.html'));
 });
 
 // Register Page
 app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/register.html'));
+    res.sendFile(path.join(__dirname, './frontend/register.html'));
 });
 
 // Shop Page
 app.get('/shop', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/shop.html'));
+    res.sendFile(path.join(__dirname, './frontend/shop.html'));
 });
 
 // Cart Page
 app.get('/cart', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/cart.html'));
+    res.sendFile(path.join(__dirname, './frontend/cart.html'));
 });
 
 
