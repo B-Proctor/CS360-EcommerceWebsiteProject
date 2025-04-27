@@ -18,6 +18,7 @@
     }
 }
 
+
 async function handleRegister(event) {
     event.preventDefault();
     const firstName = document.getElementById('firstName').value;
@@ -40,9 +41,12 @@ async function handleRegister(event) {
     }
 }
 
+
 async function checkLoginStatus() {
-    const response = await fetch('/dashboard', { credentials: 'include' });
     const nav = document.getElementById('nav-bar');
+    if (!nav) return;  // <- SAFETY CHECK in case nav-bar is missing
+
+    const response = await fetch('/dashboard', { credentials: 'include' });
 
     if (response.ok) {
         const user = await response.json();

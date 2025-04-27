@@ -48,11 +48,19 @@ router.post('/login', (req, res) => {
             lastName: user.last_name,
             isAdmin: user.role === 'admin'
         };
-        console.log('Session after login:', req.session);  // <--- ADD THIS LOG
+        console.log('Session after login:', req.session);  // keep this for debugging
 
-        res.send('Login successful.');
+       
+        req.session.save(err => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).send('Internal server error');
+            }
+            res.send('Login successful.');
+        });
     });
 });
+
 
 // === User Logout ===
 router.post('/logout', (req, res) => {
