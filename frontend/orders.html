@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Orders - Tech Shopper</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body style="background-color: #0C1618;">
+
+    <!-- Navbar -->
+    <div id="nav-bar" class="nav-bar"></div>
+
+    <!-- Header -->
+    <header class="text-white text-center py-5" style="background-color: #004643;">
+        <h1>My Orders</h1>
+        <p>Here are your recent orders placed with Tech Shopper</p>
+    </header>
+
+    <!-- Orders Section -->
+    <section class="container my-5 p-5 rounded" style="background-color: #004643;">
+        <h2 class="text-center mb-4" style="color: #D7D9CE;">Your Orders</h2>
+
+        <div id="orders-table" class="table-responsive">
+            <table class="table table-dark table-hover rounded" style="overflow: hidden;">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Placed On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-body">
+                    <!-- Orders will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2025 Tech Shopper</p>
+    </footer>
+
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background-color: #004643; color: #D7D9CE;">
+                <div class="modal-header">
+                    <h5 class="modal-title">Order Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="order-products">
+                    <!-- Products will load here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background-color: #004643; color: #D7D9CE;">
+                <div class="modal-header">
+                    <h5 class="modal-title">Leave a Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="review-form">
+                        <input type="hidden" id="review-product-id">
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating (1-5 Stars)</label>
+                            <select id="rating" class="form-select" required>
+                                <option value="">Select</option>
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Good</option>
+                                <option value="3">3 - Average</option>
+                                <option value="2">2 - Poor</option>
+                                <option value="1">1 - Terrible</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/main.js"></script>
+    <script src="/cart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            await checkLoginStatus();
+
+            const userRes = await fetch('/dashboard', { credentials: 'include' });
+            if (!userRes.ok) {
+                window.location.href = '/login';
+                return;
+            }
+            const user = await userRes.json();
+            const userId = user.id;
+
+            const ordersRes = await fetch(`/api/orders/user/${userId}`, { credentials: 'include' });
+            const orders = await ordersRes.json();
+
+            const tbody = document.getElementById('orders-body');
+
+            if (!Array.isArray(orders) || orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No orders placed yet.</td></tr>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+          <td>${order.id}</td>
+          <td>$${parseFloat(order.total_price).toFixed(2)}</td>
+          <td><strong style="color:#008780;">${order.status}</strong></td>
+          <td>${new Date(order.created_at).toLocaleDateString()}</td>
+          <td><button class="btn btn-primary btn-sm" onclick="viewOrder(${order.id})">View Details</button></td>
+        `;
+                tbody.appendChild(row);
+            });
+        });
+
+        async function viewOrder(orderId) {
+            const res = await fetch(`/api/orders/details/${orderId}`, { credentials: 'include' });
+            const products = await res.json();
+
+            const container = document.getElementById('order-products');
+            container.innerHTML = '';
+
+            if (!Array.isArray(products) || products.length === 0) {
+                container.innerHTML = '<p>No products found for this order.</p>';
+                return;
+            }
+
+            products.forEach(async product => {
+                const canReviewRes = await fetch(`/api/can-review/${product.id}`, { credentials: 'include' });
+                const canReviewData = await canReviewRes.json();
+                const canReview = canReviewData.can_review;
+
+                const div = document.createElement('div');
+                div.className = 'mb-3 p-3 rounded border border-light';
+                div.innerHTML = `
+          <h5>${product.name}</h5>
+          <p>$${parseFloat(product.price).toFixed(2)}</p>
+          <button class="btn btn-${canReview ? 'success' : 'secondary'} btn-sm" ${canReview ? '' : 'disabled'} onclick="openReviewModal(${product.id})">
+            ${canReview ? 'Leave Review' : 'Already Reviewed or Cannot Review'}
+          </button>
+        `;
+                container.appendChild(div);
+            });
+
+            const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+            modal.show();
+        }
+
+        function openReviewModal(productId) {
+            document.getElementById('review-product-id').value = productId;
+            new bootstrap.Modal(document.getElementById('reviewModal')).show();
+        }
+
+        document.getElementById('review-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const productId = document.getElementById('review-product-id').value;
+            const rating = document.getElementById('rating').value;
+
+            const res = await fetch('/api/submit-review', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ productId, rating })
+            });
+
+            if (res.ok) {
+                alert('Review submitted!');
+                bootstrap.Modal.getInstance(document.getElementById('reviewModal')).hide();
+                bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal')).hide();
+            } else {
+                alert('Failed to submit review.');
+            }
+        });
+    </script>
+
+</body>
+
+</html>

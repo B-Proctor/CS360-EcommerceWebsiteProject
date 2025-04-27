@@ -1,93 +1,66 @@
-const express = require('express');
+﻿const express = require('express');
+const session = require('express-session');
 const cors = require('cors');
 const path = require('path');
-const session = require('express-session');
-const db = require('./backend/dbConfig');
 const authRoutes = require('./backend/authRoutes');
 
 const app = express();
 
-
 app.use(express.json());
 
 app.use(cors({
-    origin: 'https://cs360-ecommercewebsiteproject.onrender.com/',
+    origin: 'https://cs360-ecommercewebsiteproject.onrender.com',
     credentials: true
 }));
 
 app.use(session({
-    secret: 'secure_secret_key', 
+    secret: 'secure_secret_key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, 
+        secure: true,
         httpOnly: true,
-        sameSite: 'lax', 
+        sameSite: 'lax',
         path: '/'
     }
 }));
 
 app.use(express.static(path.join(__dirname, './frontend')));
 
-
 app.use(authRoutes);
 
+const requireAdmin = (req, res, next) => {
+    if (req.session.user && req.session.user.isAdmin) return next();
+    return res.status(403).send('Forbidden: Admins only.');
+};
 
-
-// Home Page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, './frontend/index.html'));
+['/', '/shop', '/cart', '/login', '/register', '/orders'].forEach(route => {
+    app.get(route, (_, res) => {
+        res.sendFile(path.join(__dirname, './frontend', route === '/' ? 'index.html' : `${route.slice(1)}.html`));
+    });
 });
 
-// Login Page
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, './frontend/login.html'));
+app.get('/admin', requireAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, './frontend/admin/a_index.html'));
 });
 
-// Register Page
-app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, './frontend/register.html'));
+app.get('/admin/orders', requireAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, './frontend/admin/orders.html'));
 });
 
-// Shop Page
-app.get('/shop', (req, res) => {
-    res.sendFile(path.join(__dirname, './frontend/shop.html'));
+app.get('/admin/products', requireAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, './frontend/admin/products.html'));
 });
 
-// Cart Page
-app.get('/cart', (req, res) => {
-    res.sendFile(path.join(__dirname, './frontend/cart.html'));
+app.get('/admin/users', requireAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, './frontend/admin/users.html'));
 });
-
-
-// Profile Page
-app.get('/profile', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/login');
-    }
-
-    res.send(`
-        <h1>Welcome, ${req.session.user.firstName} ${req.session.user.lastName}!</h1>
-        <p>Email: ${req.session.user.email}</p>
-        <p><a href="/">Back to Home</a></p>
-    `);
-});
-
-
-// Error Handling
 
 app.use((req, res) => {
-    res.status(404).send('<h1>404 - Page Not Found</h1>');
+    res.status(404).send('404 Not Found');
 });
 
-// Global Error Handler (catches any other errors)
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).send('Something went wrong');
-});
-
-
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on https://cs360-ecommercewebsiteproject.onrender.com/:${PORT}`);
+    console.log(`🚀 Listening on https://cs360-ecommercewebsiteproject.onrender.com/${PORT}`);
 });

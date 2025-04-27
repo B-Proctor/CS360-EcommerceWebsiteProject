@@ -1,6 +1,5 @@
 ﻿async function handleLogin(event) {
     event.preventDefault();
-
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
@@ -21,7 +20,6 @@
 
 async function handleRegister(event) {
     event.preventDefault();
-
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
     const email = document.getElementById('email').value;
@@ -43,27 +41,23 @@ async function handleRegister(event) {
 }
 
 async function checkLoginStatus() {
-    const response = await fetch('/dashboard', {
-        credentials: 'include'
-    });
-
+    const response = await fetch('/dashboard', { credentials: 'include' });
     const nav = document.getElementById('nav-bar');
 
     if (response.ok) {
         const user = await response.json();
-
         nav.innerHTML = `
             <a href="/">Home</a>
             <a href="/shop">Shop</a>
             <a href="/cart">Cart</a>
             <div class="dropdown">
-                <a href="/profile">${user.firstName} ${user.lastName} ▼</a>
+                <a class="dropbtn" href="#">${user.firstName} ${user.lastName} ▼</a>
                 <div class="dropdown-content">
+                    <a href="/orders">Orders</a>
                     <a href="#" onclick="logout()">Logout</a>
                 </div>
             </div>
         `;
-
         if (user.isAdmin) {
             nav.innerHTML += `<a href="/admin">Admin Panel</a>`;
         }
@@ -78,8 +72,6 @@ async function checkLoginStatus() {
     }
 }
 
-
-
 async function logout() {
     const response = await fetch('/logout', {
         method: 'POST',
@@ -89,45 +81,42 @@ async function logout() {
     if (response.ok) {
         window.location.href = '/';
     } else {
-        const message = await response.text();
-        alert(`Logout failed: ${message}`);
+        const msg = await response.text();
+        alert(`Logout failed: ${msg}`);
     }
 }
 
 async function addToCart(item) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    const response = await fetch(`/products`);
-    const products = await response.json();
+    const res = await fetch('/api/products', { credentials: 'include' });
+    const products = await res.json();
     const product = products.find(p => p.id === item.id);
 
-    if (product) {
-        const existingItem = cart.find(i => i.id === item.id);
-
-        if (existingItem) {
-            if (existingItem.quantity < product.quantity) {
-                existingItem.quantity += 1;
-            } else {
-                alert(`Only ${product.quantity} in stock.`);
-                return;
-            }
-        } else {
-            if (item.quantity <= product.quantity) {
-                cart.push(item);
-            } else {
-                alert(`Only ${product.quantity} in stock.`);
-                return;
-            }
-        }
-
-        localStorage.setItem("cart", JSON.stringify(cart));
-        console.log("Item added to cart:", cart);
-        loadCart();
-    } else {
+    if (!product) {
         alert('Product no longer available.');
+        return;
+    }
+
+    let existing = cart.find(i => i.id === item.id);
+
+    if (existing) {
+        if (existing.quantity < product.quantity) {
+            existing.quantity++;
+        } else {
+            alert(`Only ${product.quantity} in stock.`);
+            return;
+        }
+    } else {
+        cart.push(item);
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    console.log("Cart:", cart);
+
+    if (typeof loadCart === "function") {
+        loadCart();  // Safe call if cart.js is loaded
     }
 }
-
-
 
 document.addEventListener('DOMContentLoaded', checkLoginStatus);
