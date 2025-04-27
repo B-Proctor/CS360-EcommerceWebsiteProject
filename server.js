@@ -5,18 +5,17 @@ const path = require('path');
 const authRoutes = require('./backend/authRoutes');
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(express.json());
 
 // CORS: Allow local dev + production
 app.use(cors({
-    origin: [
-      // 'http://localhost:3000',
-        'https://cs360-ecommercewebsiteproject.onrender.com'
-    ],
+    origin: ['https://cs360-ecommercewebsiteproject.onrender.com'],
     credentials: true
 }));
+
 
 // Session setup
 app.use(session({
@@ -24,9 +23,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: true,          // Cookie sent only over HTTPS
+        secure: false,          // Cookie sent only over HTTPS
         httpOnly: true,        // Cannot be accessed by JS
-        sameSite: 'none',       // <-- CRITICAL for cross-origin frontend/backend
+        sameSite: 'lax',       // <-- CRITICAL for cross-origin frontend/backend
         path: '/'
     }
 }));
