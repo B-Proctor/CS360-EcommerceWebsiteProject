@@ -12,7 +12,7 @@ app.use(express.json());
 // CORS: Allow local dev + production
 app.use(cors({
     origin: [
-        'http://localhost:3000',
+      // 'http://localhost:3000',
         'https://cs360-ecommercewebsiteproject.onrender.com'
     ],
     credentials: true

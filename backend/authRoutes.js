@@ -48,6 +48,7 @@ router.post('/login', (req, res) => {
             lastName: user.last_name,
             isAdmin: user.role === 'admin'
         };
+        console.log('Session after login:', req.session);  // <--- ADD THIS LOG
 
         res.send('Login successful.');
     });
